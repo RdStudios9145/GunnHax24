@@ -1,5 +1,7 @@
 #include "./raylib/raylib.h"
 #include "stdio.h"
+#include "math.h"
+#include "stdlib.h"
 
 #define SPEED 100
 
@@ -14,7 +16,7 @@
 #define SPACING 5
 
 #define TILES 2
-#define NPCS 8
+#define NPCS 9
 
 static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint);   // Draw text using font inside rectangle limits
 static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint);    // Draw text using font inside rectangle limits with support for text selection
@@ -46,7 +48,7 @@ int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
 };
 
 int npc_locations[NPCS * 2] = {
-  0, 0, 2, 1, 4, 2, 6, 3, 8, 4, 10, 5, 2, 6, 4, 7,
+  0, 0, 2, 1, 4, 2, 6, 3, 8, 4, 10, 5, 2, 6, 4, 7, 6, 8,
 };
 
 Color player_color = {
@@ -54,6 +56,19 @@ Color player_color = {
   .g = 0,
   .b = 0,
   .a = 0xFF,
+};
+
+char* names[NPCS + 2] = {
+  "Diary",
+  "Butler",
+  "Chef",
+  "Professor",
+  "Merchant",
+  "Old Man",
+  "Poet",
+  "Son",
+  "Officer",
+  "Colonel (You)",
 };
 
 char* text[NPCS] = {
@@ -79,12 +94,9 @@ char* text[NPCS] = {
   "Poet:\n\
   We all ate dinner at around 8:30 pm soon after we all arrived. We finished at around 10 pm and I went to the living room with some of the other guests and the Host. The Cook served us snacks and the Host got a knife to cut them into slices for us. He went upstairs to get some drinks for us. After some time, the Old Man returned the knife to the kitchen. After some more chatting, the Professor excused himself to go to the bathroom upstairs and the Butler also went to clean some rooms upstairs. After a few minutes, he ran downstairs and shouted that the Professor's son was stabbed in a closet.",
   "*Ded LOL*",
+  "Officer:\n\
+  Who do you think murdered the poor kid?",
 };
-
-float abs(float a) {
-  if (a > 0) return a;
-  return -1 * a;
-}
 
 void draw_world(Vector2* pos) {
   for (int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++) {
@@ -158,6 +170,17 @@ void gui(int talking) {
   DrawRectangle(0, HEIGHT - TEXTBOX_HEIGHT, WIDTH, TEXTBOX_HEIGHT, BLACK);
   // DrawText(text[talking], TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, FONTSIZE, WHITE);
   DrawTextBoxed(GetFontDefault(), text[talking], (Rectangle){ TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, WIDTH - 2 * TEXTBOX_PADDING, TEXTBOX_HEIGHT - 2 * TEXTBOX_PADDING }, FONTSIZE, SPACING, 1, WHITE);
+
+  if (talking == 8) {
+    DrawRectangle(100, 50, WIDTH - 200, HEIGHT - 300, BLACK);
+
+    for (int i = 0; i < NPCS; i++) {
+      int x = 120 + (i % 2) * ((WIDTH - 200) / 2);
+      int y = 120 + 40 * ((i / 2) % (int)ceil((double)NPCS / (double)2));
+
+      DrawText(names[i], x, y, 20, WHITE);
+    }
+  }
 }
 
 void interact(int* talking, Vector2* pos) {
@@ -216,6 +239,7 @@ int main() {
   sprites[3] = LoadTexture("old_man.png");
   sprites[6] = LoadTexture("Poet.png");
   sprites[7] = LoadTexture("Son.png");
+  sprites[8] = LoadTexture("NM-Icon.png");
 
   player = LoadTexture("Colonel.png");
 
