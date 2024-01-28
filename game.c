@@ -1,4 +1,5 @@
 #include "./raylib/raylib.h"
+#include "stdio.h"
 
 #define SPEED 100
 
@@ -9,12 +10,11 @@
 #define TILE_SIZE 50
 #define TEXTBOX_HEIGHT 200
 #define TEXTBOX_PADDING 20
-#define FONTSIZE 20
-#define SPACING 1
+#define FONTSIZE 15
+#define SPACING 5
 
 #define TILES 2
-#define NPCS 7
-#define TEXT 4
+#define NPCS 8
 
 static void DrawTextBoxed(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint);   // Draw text using font inside rectangle limits
 static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, float fontSize, float spacing, bool wordWrap, Color tint, int selectStart, int selectLength, Color selectTint, Color selectBackTint);    // Draw text using font inside rectangle limits with support for text selection
@@ -22,6 +22,9 @@ static void DrawTextBoxedSelectable(Font font, const char *text, Rectangle rec, 
 Texture2D tiles[TILES + 1];
 Texture2D sprites[NPCS];
 Texture2D player;
+
+Sound walking;
+float timeSincePlayed = 0;
 
 int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
@@ -37,7 +40,7 @@ int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
 };
 
 int npc_locations[NPCS * 2] = {
-  0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 3, 5, 3,
+  0, 0, 2, 1, 4, 2, 6, 3, 8, 4, 10, 5, 2, 6, 4, 7,
 };
 
 Color player_color = {
@@ -47,24 +50,35 @@ Color player_color = {
   .a = 0xFF,
 };
 
-char* text[TEXT + 1] = {
-  "You Should Never See This",
+char* text[NPCS] = {
   // The Colonel / Player's dialogue
-  "The guests arrived at around 8:30 pm and the Cook served us dinner. All of the guests were there for dinner at the same time, and we finished at around 10 pm. Me, the Poet, the Merchant, and the Old Man went back to the living room, the Butler gave us some drinks from upstairs and cleaned some rooms, and I don't know where everyone else went after that.",
+  "Colonel (You) Diary Entry:\n\
+  The guests arrived at around 8:30 pm and the Cook served us dinner. All of the guests were there for dinner at the same time, and we finished at around 10 pm. Me, the Poet, the Merchant, and the Old Man went back to the living room, the Butler gave us some drinks from upstairs and cleaned some rooms, and I don't know where everyone else went after that.",
   // The Merchant's dialogue
-  "Dinner started at 8:30 pm soon after I arrived. The Cook served us dinner and we finished at 10 pm. I went back to the living room with the Host and some of the other guests. After an hour or so, the Host went upstairs and came back with some drinks while the Butler went to clean some rooms. Soon before the Butler discovered the body, the Professor excused himself to use the bathroom.", 
+  "Merchant:\n\
+  Dinner started at 8:30 pm soon after I arrived. The Cook served us dinner and we finished at 10 pm. I went back to the living room with the Host and some of the other guests. After an hour or so, the Host went upstairs and came back with some drinks while the Butler went to clean some rooms. Soon before the Butler discovered the body, the Professor excused himself to use the bathroom.", 
   // The Butler's dialogue
-  "I was cleaning and setting up the living room before the guests arrived at 8:30 pm when we had dinner. After dinner, I was walking and chatting with the Professor. He excused himself and went upstairs to the bathroom, and I went upstairs as well to clean some rooms up there. I opened a closet, and I saw the son, slumped over and with a gash in his chest. I ran downstairs to tell everyone that the son was in a closet with a stab wound."
+  "Butler:\n\
+  I was cleaning and setting up the living room before the guests arrived at 8:30 pm when we had dinner. After dinner, I was walking and chatting with the Professor. He excused himself and went upstairs to the bathroom, and I went upstairs as well to clean some rooms up there. I opened a closet, and I saw the son, slumped over and with a gash in his chest. I ran downstairs to tell everyone that the son was in a closet with a stab wound.",
   // The Old Man's dialogue
-  "I got here at around 8:30 pm around the same time as the other guests. We soon had dinner and finished at around 10 pm. I went to the living room with the Host, Merchant, and Poet. The Host got a knife for the snacks and went upstairs. After some time, he returned with some drinks. After some more talking, he asked me to return the knife from earlier to the kitchen, which I did. At around 11 pm, the Professor excused himself to go to the bathroom upstairs, and the Butler also went upstairs to clean some rooms. A few minutes later, the Butler ran downstairs, shaken, telling everyone that the Professor's son was stabbed in a closet."
+  "Old Man:\n\
+  I got here at around 8:30 pm around the same time as the other guests. We soon had dinner and finished at around 10 pm. I went to the living room with the Host, Merchant, and Poet. The Host got a knife for the snacks and went upstairs. After some time, he returned with some drinks. After some more talking, he asked me to return the knife from earlier to the kitchen, which I did. At around 11 pm, the Professor excused himself to go to the bathroom upstairs, and the Butler also went upstairs to clean some rooms. A few minutes later, the Butler ran downstairs, shaken, telling everyone that the Professor's son was stabbed in a closet.",
   // The Professor's dialogue
-  "Oh my son, my son! Whyyyyy? He's only 7! We were the first guests here. The Host showed him the playroom upstairs, where he spent the whole night. I was downstairs during and after dinner, mostly talking with the Butler near the stairs. I went upstairs to the bathroom, and when I came down I was told my son was stabbed! I should have never come here with my son! Why would the colonel invite me to his party anyway? He hates me!"
+  "Professor:\n\
+  Oh my son, my son! Whyyyyy? He's only 7! We were the first guests here. The Host showed him the playroom upstairs, where he spent the whole night. I was downstairs during and after dinner, mostly talking with the Butler near the stairs. I went upstairs to the bathroom, and when I came down I was told my son was stabbed! I should have never come here with my son! Why would the colonel invite me to his party anyway? He hates me!",
   // The Cook's dialogue
-  "I started preparing the meal two hours before the guests arrived at 8:30. I served courses for dinner for an hour and a half and cleaned dishes throughout dinner and after until 10:30 pm. I served some snacks for the guests afterward, and the Host asked for a knife for the snacks. The Old Man returned it to me at around 11 pm as I was cleaning dishes from the snacks.",
+  "Cook:\n\
+  I started preparing the meal two hours before the guests arrived at 8:30. I served courses for dinner for an hour and a half and cleaned dishes throughout dinner and after until 10:30 pm. I served some snacks for the guests afterward, and the Host asked for a knife for the snacks. The Old Man returned it to me at around 11 pm as I was cleaning dishes from the snacks.",
   // The Poet's dialogue
-  "We all ate dinner at around 8:30 pm soon after we all arrived. We finished at around 10 pm and I went to the living room with some of the other guests and the Host. The Cook served us snacks and the Host got a knife to cut them into slices for us. He went upstairs to get some drinks for us. After some time, the Old Man returned the knife to the kitchen. After some more chatting, the Professor excused himself to go to the bathroom upstairs and the Butler also went to clean some rooms upstairs. After a few minutes, he ran downstairs and shouted that the Professor's son was stabbed in a closet."
-  
+  "Poet:\n\
+  We all ate dinner at around 8:30 pm soon after we all arrived. We finished at around 10 pm and I went to the living room with some of the other guests and the Host. The Cook served us snacks and the Host got a knife to cut them into slices for us. He went upstairs to get some drinks for us. After some time, the Old Man returned the knife to the kitchen. After some more chatting, the Professor excused himself to go to the bathroom upstairs and the Butler also went to clean some rooms upstairs. After a few minutes, he ran downstairs and shouted that the Professor's son was stabbed in a closet.",
+  "*Ded LOL*",
 };
+
+float abs(float a) {
+  if (a > 0) return a;
+  return -1 * a;
+}
 
 void draw_world(Vector2* pos) {
   for (int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++) {
@@ -75,8 +89,8 @@ void draw_world(Vector2* pos) {
     Texture2D tex = tiles[tile];
 
     DrawTexture(tex,
-                (int)(i % LEVEL_WIDTH) * TILE_SIZE - pos->x,
-                (int)(i / LEVEL_WIDTH) * TILE_SIZE - pos->y,
+                (int)(i % LEVEL_WIDTH) * TILE_SIZE - pos->x - 25 + WIDTH / 2,
+                (int)(i / LEVEL_WIDTH) * TILE_SIZE - pos->y + HEIGHT / 2,
                 WHITE);
   }
 }
@@ -87,9 +101,17 @@ void draw_npcs(Vector2* pos) {
     int x = npc_locations[2 * i];
     int y = npc_locations[2 * i + 1];
 
+    if (i == 0) {
+      DrawTexture(npc,
+                  x * TILE_SIZE - pos->x - 25 + WIDTH / 2,
+                  y * TILE_SIZE - pos->y + HEIGHT / 2,
+                  WHITE);
+      continue;
+    }
+
     DrawTexture(npc,
-                x * TILE_SIZE - pos->x - 25,
-                y * TILE_SIZE - pos->y - 100,
+                x * TILE_SIZE - pos->x - 50 + WIDTH / 2,
+                y * TILE_SIZE - pos->y - 50 + HEIGHT / 2,
                 WHITE);
   }
 }
@@ -97,28 +119,69 @@ void draw_npcs(Vector2* pos) {
 void deal_with_player(Vector2* pos, float delta) {
   float sped = SPEED * delta;
 
-  if (IsKeyDown(KEY_W)) pos->y -= sped;
-  if (IsKeyDown(KEY_S)) pos->y += sped;
-  if (IsKeyDown(KEY_A)) pos->x -= sped;
-  if (IsKeyDown(KEY_D)) pos->x += sped;
+  int w = IsKeyDown(KEY_W);
+  int s = IsKeyDown(KEY_S);
+  int a = IsKeyDown(KEY_A);
+  int d = IsKeyDown(KEY_D);
+
+  if ((w || s || a || d) && !IsSoundPlaying(walking) && timeSincePlayed >= .25) {
+    PlaySound(walking);
+    timeSincePlayed = 0;
+  }
+
+  if (w) pos->y -= sped;
+  if (s) pos->y += sped;
+  if (a) pos->x -= sped;
+  if (d) pos->x += sped;
+
+  if (pos->x <= 0) pos->x = 0;
+  if (pos->x >= (LEVEL_WIDTH - 1) * TILE_SIZE) pos->x = (LEVEL_WIDTH - 1) * TILE_SIZE;
+  if (pos->y <= 0) pos->y = 0;
+  if (pos->y >= (LEVEL_HEIGHT - 1) * TILE_SIZE) pos->y = (LEVEL_HEIGHT - 1) * TILE_SIZE;
 
   // DrawRectangle(WIDTH / 2 - 50, HEIGHT / 2 - 50, 100, 100, player_color);
   DrawTexture(player, WIDTH / 2 - 50, HEIGHT / 2 - 50, WHITE);
 }
 
 void gui(int talking) {
-  if (talking == 0) return;
+  char* click_text = "[Left Click] to interact";
+  DrawText(click_text, WIDTH / 2 - MeasureText(click_text, 20) / 2, 0, 20, WHITE);
+
+  if (talking < 0) return;
 
   DrawRectangle(0, HEIGHT - TEXTBOX_HEIGHT, WIDTH, TEXTBOX_HEIGHT, BLACK);
   // DrawText(text[talking], TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, FONTSIZE, WHITE);
   DrawTextBoxed(GetFontDefault(), text[talking], (Rectangle){ TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, WIDTH - 2 * TEXTBOX_PADDING, TEXTBOX_HEIGHT - 2 * TEXTBOX_PADDING }, FONTSIZE, SPACING, 1, WHITE);
+}
 
-  #define click_text "[Click] to interact"
-  DrawText(click_text, WIDTH / 2 - MeasureText(click_text, 20) / 2, 0, 20, WHITE);
+void interact(int* talking, Vector2* pos) {
+  if (*talking != -1) {
+    *talking = -1;
+    return;
+  }
+
+  for (int i = 0; i < NPCS; i++) {
+    int x = npc_locations[2 * i];
+    int y = npc_locations[2 * i + 1];
+
+    //printf("%f, %f, %d, %d, %d\n", pos->x, pos->y, x, y, i);
+
+    if (abs(x - pos->x / TILE_SIZE) <= 1 && abs(y - pos->y / TILE_SIZE) <= 1) {
+      *talking = i;
+      return;
+    }
+  }
 }
 
 int main() {
   InitWindow(WIDTH, HEIGHT, "Game!");
+  InitAudioDevice();
+
+  walking = LoadSound("Waulcking_Sownde_Iffeckt.wav");
+
+  Image icon = LoadImage("NM-Icon.png");
+  SetWindowIcon(icon);
+
   Color bkg_color = {
     .r = 0,
     .b = 0,
@@ -136,22 +199,29 @@ int main() {
   tiles[1] = LoadTextureFromImage(tile1);
   tiles[2] = LoadTextureFromImage(tile2);
 
-  sprites[0] = LoadTexture("butler.png");
-  sprites[1] = LoadTexture("Chef.png");
-  sprites[2] = LoadTexture("Colonel.png");
-  sprites[3] = LoadTexture("merchant.png");
-  sprites[4] = LoadTexture("old_man.png");
-  sprites[5] = LoadTexture("Poet.png");
-  sprites[6] = LoadTexture("Son.png");
+  Image book = LoadImage("diary.png");
+  ImageResize(&book, TILE_SIZE, TILE_SIZE);
 
-  player = LoadTexture("professor.png");
+  sprites[0] = LoadTextureFromImage(book);
+  sprites[2] = LoadTexture("butler.png");
+  sprites[5] = LoadTexture("Chef.png");
+  sprites[4] = LoadTexture("professor.png");
+  sprites[1] = LoadTexture("merchant.png");
+  sprites[3] = LoadTexture("old_man.png");
+  sprites[6] = LoadTexture("Poet.png");
+  sprites[7] = LoadTexture("Son.png");
 
-  int talking = 0;
+  player = LoadTexture("Colonel.png");
+
+  int talking = -1;
 
   while (!WindowShouldClose()) {
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) interact(&talking, &pos);
     BeginDrawing();
     ClearBackground(bkg_color);
     float delta = GetFrameTime();
+
+    timeSincePlayed += delta;
 
     draw_world(&pos);
     draw_npcs(&pos);
@@ -163,6 +233,8 @@ int main() {
     EndDrawing();
   }
 
+  CloseAudioDevice();
+  CloseWindow();
   return 0;
 }
 
