@@ -7,7 +7,7 @@
 #define LEVEL_WIDTH  10
 #define LEVEL_HEIGHT 10
 #define TILE_SIZE 25
-#define TEXTBOX_HEIGHT 100
+#define TEXTBOX_HEIGHT 200
 #define TEXTBOX_PADDING 20
 #define FONTSIZE 20
 
@@ -49,7 +49,10 @@ void draw_world(Vector2* pos) {
 
     Texture2D tex = tiles[tile];
 
-    DrawTexture(tex, (int)(i % LEVEL_WIDTH) * TILE_SIZE, (int)(i / LEVEL_WIDTH) * TILE_SIZE, WHITE);
+    DrawTexture(tex,
+                (int)(i % LEVEL_WIDTH) * TILE_SIZE - pos->x,
+                (int)(i / LEVEL_WIDTH) * TILE_SIZE - pos->y,
+                WHITE);
   }
 }
 
@@ -61,7 +64,7 @@ void deal_with_player(Vector2* pos, float delta) {
   if (IsKeyDown(KEY_A)) pos->x -= sped;
   if (IsKeyDown(KEY_D)) pos->x += sped;
 
-  DrawRectangle(pos->x, pos->y, 100, 100, player_color);
+  DrawRectangle(WIDTH / 2 - 50, HEIGHT / 2 - 50, 100, 100, player_color);
 }
 
 void gui(int talking) {
