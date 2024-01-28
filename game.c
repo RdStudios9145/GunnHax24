@@ -12,9 +12,11 @@
 #define FONTSIZE 20
 
 #define TILES 2
+#define NPCS 8
 #define TEXT 1
 
 Texture2D tiles[TILES + 1];
+Texture2D sprites[NPCS + 1];
 
 int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
@@ -112,6 +114,14 @@ int main() {
 
   tiles[1] = LoadTexture("tile1.png");
   tiles[2] = LoadTexture("tile2.png");
+  sprites[0] = LoadTexture("butler.png");
+  sprites[1] = LoadTexture("Chef.png");
+  sprites[2] = LoadTexture("Colonel.png");
+  sprites[3] = LoadTexture("merchant.png");
+  sprites[4] = LoadTexture("old_man.png");
+  sprites[5] = LoadTexture("Poet.png");
+  sprites[6] = LoadTexture("professor.png");
+  sprites[7] = LoadTexture("Son.png");
 
   int talking = 1;
 
