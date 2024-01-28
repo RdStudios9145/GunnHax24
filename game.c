@@ -10,6 +10,7 @@
 #define TEXTBOX_HEIGHT 200
 #define TEXTBOX_PADDING 20
 #define FONTSIZE 20
+#define SPACING 1
 
 #define TILES 2
 #define NPCS 7
@@ -109,7 +110,11 @@ void gui(int talking) {
   if (talking == 0) return;
 
   DrawRectangle(0, HEIGHT - TEXTBOX_HEIGHT, WIDTH, TEXTBOX_HEIGHT, BLACK);
-  DrawText(text[talking], TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, FONTSIZE, WHITE);
+  // DrawText(text[talking], TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, FONTSIZE, WHITE);
+  DrawTextBoxed(GetFontDefault(), text[talking], (Rectangle){ TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, WIDTH - 2 * TEXTBOX_PADDING, TEXTBOX_HEIGHT - 2 * TEXTBOX_PADDING }, FONTSIZE, SPACING, 1, WHITE);
+
+  #define click_text "[Click] to interact"
+  DrawText(click_text, WIDTH / 2 - MeasureText(click_text, 20) / 2, 0, 20, WHITE);
 }
 
 int main() {
@@ -141,7 +146,7 @@ int main() {
 
   player = LoadTexture("professor.png");
 
-  int talking = 1;
+  int talking = 0;
 
   while (!WindowShouldClose()) {
     BeginDrawing();
