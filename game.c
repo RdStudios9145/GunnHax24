@@ -38,7 +38,32 @@ Color player_color = {
 
 char* text[TEXT + 1] = {
   "You Should Never See This",
-  "Test"
+  // The Colonel / Player's dialogue
+  "The guests arrived at around 8:30 pm and the Cook served us dinner. 
+  All of the guests were there for dinner at the same time, and we 
+  finished at around 10 pm. Me, the poet, the merchant, and the old 
+  man went back to the living room, the butler gave us some drinks 
+  from upstairs and cleaned some rooms, and I don't know where 
+  everyone else went after that.",
+  // The Merchant's dialogue
+  "Dinner started at 8:30 pm soon after I arrived. The cook served 
+  us dinner and we finished at 10 pm. I went back to the living room 
+  with the host and some of the other guests. After an hour or so, 
+  the host went upstairs and came back with some drinks while the 
+  butler went to clean some rooms. Soon before the butler discovered 
+  the body, the professor excused himself to use the bathroom.", 
+  // The Cook's dialogue
+  "I started preparing the meal two hours before the guests arrived 
+  at 8:30. I served courses for dinner for an hour and a half and 
+  cleaned dishes throughout dinner and after until 10:30 pm. I served 
+  some snacks for the guests afterward, and the host asked for a knife 
+  for the snacks. One of the guests returned it to me at around 11 pm 
+  as I was cleaning dishes from the snacks.",
+  // The Professor's dialogue
+  "Oh my son, my son! Whyyyyy? I was downstairs the whole time, during
+   and after dinner, just talking with the butler near the stairs. I
+    should have never come here with my son! Why would the colonel
+     invite me to his party anyway? He hates me!"
 };
 
 void draw_world(Vector2* pos) {
