@@ -2,16 +2,21 @@
 
 #define SPEED 100
 
-#define WIDHT  800
+#define WIDTH  800
 #define HEIGHT 600
 #define LEVEL_WIDTH  10
 #define LEVEL_HEIGHT 10
+#define TILE_SIZE 25
+#define TEXTBOX_HEIGHT 100
+#define TEXTBOX_PADDING 20
+#define FONTSIZE 20
 
 #define TILES 2
+#define TEXT 1
 
-Texture2D[TILES + 1] tiles;
+Texture2D tiles[TILES + 1];
 
-int[LEVEL_WIDTH * LEVEL_HEIGHT] world = [
+int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
   2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
@@ -22,7 +27,7 @@ int[LEVEL_WIDTH * LEVEL_HEIGHT] world = [
   2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
   2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
-];
+};
 
 Color player_color = {
   .r = 0xFF,
@@ -31,8 +36,21 @@ Color player_color = {
   .a = 0xFF,
 };
 
-void draw_world(Vector2* pos) {
+char* text[TEXT + 1] = {
+  "You Should Never See This",
+  "Test"
+};
 
+void draw_world(Vector2* pos) {
+  for (int i = 0; i < LEVEL_WIDTH * LEVEL_HEIGHT; i++) {
+    int tile = world[i];
+
+    if (tile == 0) continue;
+
+    Texture2D tex = tiles[tile];
+
+    DrawTexture(tex, (int)(i % LEVEL_WIDTH) * TILE_SIZE, (int)(i / LEVEL_WIDTH) * TILE_SIZE, WHITE);
+  }
 }
 
 void deal_with_player(Vector2* pos, float delta) {
@@ -44,6 +62,13 @@ void deal_with_player(Vector2* pos, float delta) {
   if (IsKeyDown(KEY_D)) pos->x += sped;
 
   DrawRectangle(pos->x, pos->y, 100, 100, player_color);
+}
+
+void gui(int talking) {
+  if (talking == 0) return;
+
+  DrawRectangle(0, HEIGHT - TEXTBOX_HEIGHT, WIDTH, TEXTBOX_HEIGHT, BLACK);
+  DrawText(text[talking], TEXTBOX_PADDING, HEIGHT - TEXTBOX_HEIGHT + TEXTBOX_PADDING, FONTSIZE, WHITE);
 }
 
 int main() {
@@ -60,6 +85,8 @@ int main() {
   tiles[1] = LoadTexture("tile1.png");
   tiles[2] = LoadTexture("tile2.png");
 
+  int talking = 1;
+
   while (!WindowShouldClose()) {
     BeginDrawing();
     ClearBackground(bkg_color);
@@ -68,6 +95,8 @@ int main() {
     draw_world(&pos);
 
     deal_with_player(&pos, delta);
+
+    gui(talking);
 
     EndDrawing();
   }
