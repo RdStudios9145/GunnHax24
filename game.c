@@ -12,7 +12,7 @@
 #define FONTSIZE 20
 
 #define TILES 2
-#define TEXT 1
+#define TEXT 4
 
 Texture2D tiles[TILES + 1];
 
@@ -50,7 +50,7 @@ char* text[TEXT + 1] = {
   us dinner and we finished at 10 pm. I went back to the living room \
   with the host and some of the other guests. After an hour or so, \
   the host went upstairs and came back with some drinks while the \
-  butler went to clean some rooms. Soon before the butler discovered\ 
+  butler went to clean some rooms. Soon before the butler discovered \
   the body, the professor excused himself to use the bathroom.",
   // The Cook's dialogue
   "I started preparing the meal two hours before the guests arrived \
@@ -109,6 +109,8 @@ int main() {
   };
 
   Vector2 pos = { .x = 0.0, .y = 0.0, };
+  Image tile1 = LoadImage("tile1.png");
+  ImageResizeNN(&tile1, TILE_SIZE, TILE_SIZE);
 
   tiles[1] = LoadTexture("tile1.png");
   tiles[2] = LoadTexture("tile2.png");
