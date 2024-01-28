@@ -40,17 +40,17 @@ int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
   2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
   2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3,
-  4, 4, 4, 4, 4, 4, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-  4, 4, 4, 4, 4, 4, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-  4, 4, 4, 4, 4, 4, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
-  4, 4, 4, 4, 4, 4, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
+  1, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1,
 };
 
 int npc_locations[NPCS * 2] = {
-  0, 0, 2, 1, 4, 2, 6, 3, 8, 4, 10, 5, 2, 6, 4, 7, 6, 8,
+  0, 0, 13, 13, 2, 12, 13, 3, 8, 2, 1, 15, 5, 6, 11, 4, 6, 8,
 };
 
 Color player_color = {
@@ -78,7 +78,7 @@ char* text[NPCS * 2] = {
   "Colonel (You) Diary Entry:\n\
   The guests arrived at around 8:30 pm and the Cook served us dinner. All of the guests were there for dinner at the same time, and we finished at around 10 pm.",
   "Colonel (You) Diary Entry:\n\
-  The Poet, the Merchant, the Old Man and I went back to the living room, the Butler gave us some drinks from upstairs and cleaned some rooms, and I don't know where everyone else went after that.",
+The Poet, the Merchant, the Old Man and I went back to the living room, the Butler gave us some drinks from upstairs and cleaned some rooms, and I don't know where everyone else went after that. After a while at around 11:15pm, the Butler ran downstairs, shocked, saying that the Professor's son was stabbed.",
   // The Merchant's dialogue
   "Merchant:\n\
   Dinner started at 8:30 pm soon after I arrived. The Cook served us dinner and we finished at 10 pm. I went back to the living room with the Host and some of the other guests.",
@@ -109,8 +109,8 @@ char* text[NPCS * 2] = {
   We all ate dinner at around 8:30 pm soon after we all arrived. We finished at around 10 pm and I went to the living room with some of the other guests and the Host. The Cook served us snacks and the Host got a knife to cut them into slices for us. He went upstairs to get some drinks for us.",
   "Poet:\n\
   After some time, the Old Man returned the knife to the kitchen. After some more chatting, the Professor excused himself to go to the bathroom upstairs and the Butler also went to clean some rooms upstairs. After a few minutes, he ran downstairs and shouted that the Professor's son was stabbed in a closet.",
-  "*Ded LOL*",
-  "*Still Ded*",
+  "*Dead*",
+  "...",
   "Officer:\n\
   Who do you think murdered the poor kid?",
   "Officer:\n\
@@ -292,7 +292,7 @@ int main() {
   sprites[1] = LoadTexture("merchant.png");
   sprites[3] = LoadTexture("old_man.png");
   sprites[6] = LoadTexture("Poet.png");
-  sprites[7] = LoadTexture("Son.png");
+  sprites[7] = LoadTexture("Son(1).png");
   sprites[8] = LoadTexture("Police(1).png");
 
   player = LoadTexture("Colonel.png");
