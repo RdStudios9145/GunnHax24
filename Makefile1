@@ -1,0 +1,6 @@
+
+game: *.o
+	ld -o game $^ -dynamic-linker /lib64/ld-linux-x86-64.so.2 -L./raylib/ -lc -lraylib -lm
+
+%.o: %.c
+	cc -o $^
