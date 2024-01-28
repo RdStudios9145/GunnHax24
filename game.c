@@ -13,7 +13,7 @@
 
 #define TILES 2
 #define NPCS 8
-#define TEXT 1
+#define TEXT 4
 
 Texture2D tiles[TILES + 1];
 Texture2D sprites[NPCS + 1];
