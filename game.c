@@ -6,17 +6,18 @@
 #define HEIGHT 600
 #define LEVEL_WIDTH  10
 #define LEVEL_HEIGHT 10
-#define TILE_SIZE 25
+#define TILE_SIZE 50
 #define TEXTBOX_HEIGHT 200
 #define TEXTBOX_PADDING 20
 #define FONTSIZE 20
 
 #define TILES 2
-#define NPCS 8
+#define NPCS 7
 #define TEXT 4
 
 Texture2D tiles[TILES + 1];
-Texture2D sprites[NPCS + 1];
+Texture2D sprites[NPCS];
+Texture2D player;
 
 int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
@@ -29,6 +30,10 @@ int world[LEVEL_WIDTH * LEVEL_HEIGHT] = {
   2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
   1, 2, 1, 2, 1, 2, 1, 2, 1, 2,
   2, 1, 2, 1, 2, 1, 2, 1, 2, 1,
+};
+
+int npc_locations[NPCS * 2] = {
+  0, 0, 1, 1, 2, 2, 2, 3, 3, 3, 4, 3, 5, 3,
 };
 
 Color player_color = {
@@ -72,6 +77,19 @@ void draw_world(Vector2* pos) {
   }
 }
 
+void draw_npcs(Vector2* pos) {
+  for (int i = 0; i < NPCS; i++) {
+    Texture npc = sprites[i];
+    int x = npc_locations[2 * i];
+    int y = npc_locations[2 * i + 1];
+
+    DrawTexture(npc,
+                x * TILE_SIZE - pos->x - 25,
+                y * TILE_SIZE - pos->y - 100,
+                WHITE);
+  }
+}
+
 void deal_with_player(Vector2* pos, float delta) {
   float sped = SPEED * delta;
 
@@ -80,7 +98,8 @@ void deal_with_player(Vector2* pos, float delta) {
   if (IsKeyDown(KEY_A)) pos->x -= sped;
   if (IsKeyDown(KEY_D)) pos->x += sped;
 
-  DrawRectangle(WIDTH / 2 - 50, HEIGHT / 2 - 50, 100, 100, player_color);
+  // DrawRectangle(WIDTH / 2 - 50, HEIGHT / 2 - 50, 100, 100, player_color);
+  DrawTexture(player, WIDTH / 2 - 50, HEIGHT / 2 - 50, WHITE);
 }
 
 void gui(int talking) {
@@ -101,16 +120,23 @@ int main() {
 
   Vector2 pos = { .x = 0.0, .y = 0.0, };
 
-  tiles[1] = LoadTexture("tile1.png");
-  tiles[2] = LoadTexture("tile2.png");
+  Image tile1 = LoadImage("tile1.png");
+  ImageResizeNN(&tile1, TILE_SIZE, TILE_SIZE);
+  Image tile2 = LoadImage("tile2.png");
+  ImageResizeNN(&tile2, TILE_SIZE, TILE_SIZE);
+
+  tiles[1] = LoadTextureFromImage(tile1);
+  tiles[2] = LoadTextureFromImage(tile2);
+
   sprites[0] = LoadTexture("butler.png");
   sprites[1] = LoadTexture("Chef.png");
   sprites[2] = LoadTexture("Colonel.png");
   sprites[3] = LoadTexture("merchant.png");
   sprites[4] = LoadTexture("old_man.png");
   sprites[5] = LoadTexture("Poet.png");
-  sprites[6] = LoadTexture("professor.png");
-  sprites[7] = LoadTexture("Son.png");
+  sprites[6] = LoadTexture("Son.png");
+
+  player = LoadTexture("professor.png");
 
   int talking = 1;
 
@@ -120,6 +146,7 @@ int main() {
     float delta = GetFrameTime();
 
     draw_world(&pos);
+    draw_npcs(&pos);
 
     deal_with_player(&pos, delta);
 
